@@ -8,7 +8,7 @@ function Player(renderer) {
 	var playing = false;
 
 	this.init = function() {
-		T("audio").load("http://mohayonao.github.io/timbre.js/misc/audio/drumkit.wav", function() {
+		T("audio").load("https://mohayonao.github.io/timbre.js/misc/audio/drumkit.wav", function() {
 			drumSounds[1] = this.slice(   0,  500).set({bang:false});
 			drumSounds[2] = this.slice( 500, 1000).set({bang:false});
 			drumSounds[3] = this.slice(1000, 1500).set({bang:false, mul:0.2});
