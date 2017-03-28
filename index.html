@@ -1,0 +1,128 @@
+<html>
+<head>
+<title>func(y)</title>
+<style type="text/css" media="screen">
+    
+    #editor { 
+        position: absolute;
+        top: 50%;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    #songCanvasForeground, #songCanvasBackground {
+    	position: absolute;
+    	top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;	
+    }
+
+    #playButton {
+    	position: absolute;
+    	top: 0;
+        right: 0;
+        font-size: 2em;
+    }
+
+</style>
+<script src="timbre.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="api.js" type="text/javascript" charset="utf-8"></script>
+<script src="player.js" type="text/javascript" charset="utf-8"></script>
+<script src="renderer.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+<div>
+	<canvas id="songCanvasBackground" width="640px" height="480px"></canvas>
+	<canvas id="songCanvasForeground" width="640px" height="480px"></canvas>
+</div>
+
+<button id="playButton" type="button" onclick="playSong()">Play</button>
+<div id="editor">
+/* 
+func(y) - The programmable synth game
+
+Mission: Create the following song: 
+Track 1: [0,1,0,1,0,1,0,1,0,1]
+
+Available variables: 
+i = current iteration
+*/
+
+this.getSong = function() {
+	var song = new Song('my song', 16);
+	song.tracks = [];
+	song.tracks.push(new Track('Drums'));
+	song.tracks.push(new Track('track 2'));
+	return song;
+}
+
+this.update = function(i, song, tempo) {
+	song.tracks[0].note(i, i % 4 === 0 ? 1 : 0);
+	song.tracks[0].note(i, i % 8 === 4 ? 2 : 0);
+	song.tracks[1].note(i, i % 2 === 0 ? 3 : 0);
+}
+
+return this;
+
+</div>
+	
+<script>
+	
+	var renderer = getRenderer();
+	var player = new Player(renderer);
+	var song = undefined;
+
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.getSession().setMode("ace/mode/javascript");
+    editor.getSession().on("changeAnnotation", function() {
+	    var annot = editor.getSession().getAnnotations();
+	    var recompile = true;
+	    for (var key in annot){
+	        if (annot[key].type != "info") {
+	        	recompile = false;
+	        }
+	    }
+
+	    if (recompile) {
+	    	song = compileCode();
+	    	renderer.redrawSong(song);
+	    }
+
+	});
+
+	function compileCode() {
+		//var tempo = 100; // 100 bps
+		var code = editor.getValue();
+		var implementation = new Function(code)();
+		var song = implementation.getSong();
+		for (var i=0; i < song.length; i++) {
+			implementation.update(i, song);
+		}
+		return song;
+	}
+
+    function playSong() {
+		if (song === undefined) {
+			return;
+		}
+		player.play(song);
+	}
+
+	function getRenderer() {
+		var songCanvasBackground = document.getElementById("songCanvasBackground");
+		songCanvasBackground.width = document.body.clientWidth; //document.width is obsolete
+    	songCanvasBackground.height = document.body.clientHeight; //document.height is obsolete
+    	var songCanvasForeground = document.getElementById("songCanvasForeground");
+		songCanvasForeground.width = document.body.clientWidth; //document.width is obsolete
+    	songCanvasForeground.height = document.body.clientHeight; //document.height is obsolete
+    	return new Renderer(songCanvasBackground, songCanvasForeground);
+	}
+</script>
+
+</body>
+</html>
