@@ -13,10 +13,12 @@ function Renderer(canvasBackground, canvasForeground) {
 
     this.redrawSong = function(song) {        
         this.ctxBackground.fillStyle = skin.backgroundColor;
-        this.ctxBackground.fillRect(0, 0, this.canvasW, this.canvasH);        
+        this.ctxBackground.fillRect(0, 0, this.canvasW, this.canvasH);
+        //console.log("targetTracks: " + song.targetTracks.length, song.targetTracks);
         for (var i = 0; i < song.tracks.length; i++) {
             var track = song.tracks[i];
-            this.drawTrack(i, track);
+            this.drawTrackLane(i, track);
+            this.drawTrack(i, song, track);
         }
         this.drawGrid();
     }
@@ -52,26 +54,61 @@ function Renderer(canvasBackground, canvasForeground) {
         }
     }
 
-    this.drawTrack = function(trackRow, track) {
+    this.drawTrackLane = function(trackRow, track) {
         this.ctxBackground.fillStyle = skin.trackNameColor;
         this.ctxBackground.font = "15px Arial";
         this.ctxBackground.fillText(track.name, 0, ((trackRow + 1) * this.unitSize) - 2);
+    }
 
-        for (var i = 0; i < track.notes.length; i++) {
-            var notes = track.notes[i];
+    this.drawTrack = function(trackRow, song, track) {
+        console.log("drawing target notes: " + track.targetNotes.length);
+        for (var i = 0; i < song.length; i++) {
+            var notes = track.targetNotes[i];
             if (notes != undefined) {
                 for (var note in notes) {
                     if (note != 0) {
-                        this.drawNote(i * this.unitSize, trackRow * this.unitSize, note);
+                        this.drawNote(i * this.unitSize, trackRow * this.unitSize, note, skin.noteTargetColor);
+                    }
+                }
+            }
+            notes = track.notes[i];
+            if (notes != undefined) {
+                for (var note in notes) {
+                    if (note != 0) {
+                        this.drawNote(i * this.unitSize, trackRow * this.unitSize, note, skin.noteColor);
+                    }
+                }
+            }
+
+        }
+/*
+        for (var i = 0; i < track.targetNotes.length; i++) {
+            
+            console.log("drawing note at " + notes);
+            if (notes != undefined) {
+                for (var note in notes) {
+                    if (note != 0) {
+                        this.drawNote(i * this.unitSize, trackRow * this.unitSize, note, skin.noteTargetColor);
+                    }
+                }
+            }
+        }
+        for (var i = 0; i < track.notes.length; i++) {
+            
+            if (notes != undefined) {
+                for (var note in notes) {
+                    if (note != 0) {
+                        this.drawNote(i * this.unitSize, trackRow * this.unitSize, note, skin.noteColor);
                     }
                 }
             } 
         }
+        */
     }
 
-    this.drawNote = function(x, y, note) {
+    this.drawNote = function(x, y, note, noteColor) {
         this.ctxBackground.beginPath();
-        this.ctxBackground.fillStyle = skin.noteColor;
+        this.ctxBackground.fillStyle = noteColor;
         this.ctxBackground.fillRect(trackPaddingLeft + x, y + this.unitSize - (note*4), this.unitSize, 4);
         this.ctxBackground.stroke();
     }
@@ -80,6 +117,7 @@ function Renderer(canvasBackground, canvasForeground) {
 function Skin() {
     this.backgroundColor = '#607D8B';
     this.noteColor = '#F44336';
+    this.noteTargetColor = '#FFEB3B';
     this.gridColor = '#455A64';
     this.trackNameColor = '#FAFAFA';
     this.trackPositionColor = 'rgba(50,50,75,0.5)';

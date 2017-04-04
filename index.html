@@ -45,25 +45,13 @@
 /* 
 func(y) - The programmable synth game
 
-Mission: Create the following song: 
-Track 1: [0,1,0,1,0,1,0,1,0,1]
-
-Available variables: 
-i = current iteration
+Mission: Recreate the notes in yellow
 */
 
-this.getSong = function() {
-	var song = new Song('my song', 16);
-	song.tracks = [];
-	song.tracks.push(new Track('Drums'));
-	song.tracks.push(new Track('track 2'));
-	return song;
-}
-
-this.update = function(i, song, tempo) {
-	song.tracks[0].note(i, i % 4 === 0 ? 1 : 0);
-	song.tracks[0].note(i, i % 8 === 4 ? 2 : 0);
-	song.tracks[1].note(i, i % 2 === 0 ? 3 : 0);
+this.update = function(i, tracks) {
+	tracks[0].note(i, i % 4 === 0 ? 1 : 0);
+	tracks[0].note(i, i % 8 === 4 ? 2 : 0);
+	tracks[1].note(i, i % 2 === 0 ? 3 : 0);
 }
 
 return this;
@@ -99,9 +87,10 @@ return this;
 		//var tempo = 100; // 100 bps
 		var code = editor.getValue();
 		var implementation = new Function(code)();
-		var song = implementation.getSong();
+		var song = getTargetSong(); //implementation.getSong();
+		console.log("song", song);
 		for (var i=0; i < song.length; i++) {
-			implementation.update(i, song);
+			implementation.update(i, song.tracks);
 		}
 		return song;
 	}
@@ -121,6 +110,19 @@ return this;
 		songCanvasForeground.width = document.body.clientWidth; //document.width is obsolete
     	songCanvasForeground.height = document.body.clientHeight; //document.height is obsolete
     	return new Renderer(songCanvasBackground, songCanvasForeground);
+	}
+
+	function getTargetSong() {
+		var song = new Song('my song', 16);
+		song.tracks = [];
+		var track = new Track('Drums');
+		track.targetNote(0, 1);
+		track.targetNote(0, 5);
+		track.targetNote(1, 2);
+		track.targetNote(2, 3);
+		song.tracks.push(track);
+		song.tracks.push(new Track('track 2'));
+		return song;
 	}
 </script>
 
